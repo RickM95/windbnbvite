@@ -1,34 +1,67 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from 'react'
+
+import staysData from './components/stays.jsx'
+import Header from './components/Header'
+import StaysGrid from './components/StaysGrid'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [stays, setStays] = useState(staysData)
+  const [filteredStays, setFilteredStays] = useState(staysData)
+  const [location, setLocation] = useState('')
+  const [guests, setGuests] = useState(0)
+  const [adults, setAdults] = useState(0)
+  const [children, setChildren] = useState(0)
+  const [modalOpen, setModalOpen] = useState(false)
+
+  console.log("App rendering...")
+
+  useEffect(() => {
+    console.log("Filtering stays...")
+    let result = stays;
+
+    if (location) {
+      result = result.filter(stay => {
+        return `${stay.city}, ${stay.country}` === location
+      })
+    }
+
+    if (guests > 0) {
+      result = result.filter(stay => stay.maxGuests >= guests)
+    }
+
+    setFilteredStays(result)
+  }, [location, guests, stays])
+
+  const handleSearch = (loc, adultCount, childCount) => {
+    console.log("Search clicked", loc, adultCount, childCount)
+    setLocation(loc)
+    setAdults(adultCount)
+    setChildren(childCount)
+    setGuests(adultCount + childCount)
+    setModalOpen(false)
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="App">
+      <Header 
+        location={location}
+        guests={guests}
+        modalOpen={modalOpen}
+        setModalOpen={setModalOpen}
+        handleSearch={handleSearch}
+        adults={adults}
+        setAdults={setAdults}
+        children={children}
+        setChildren={setChildren}
+        allStays={stays}
+      />
+      
+      <StaysGrid stays={filteredStays} />
+      
+      <footer style={{ marginTop: '50px', textAlign: 'center', color: '#828282' }}>
+        created by <span style={{ fontWeight: 'bold' }}>RickM95</span> - devChallenges.io
+      </footer>
+    </div>
   )
 }
 
